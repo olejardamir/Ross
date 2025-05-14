@@ -1,30 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routing import ApiRouter  # Ensure this path is correct
-from app.config.settings import settings  # Load settings from .env
+from app.routing import ApiRouter
+from app.config.settings import settings
 
 
+# see https://youtrack.jetbrains.com/issue/PY-76760/support-type-matching-ParamSpeced-Protocols-FASTAPI-CorsMiddleware-type-issue
 def create_app() -> FastAPI:
-    app = FastAPI()
-
-    # Set up CORS middleware
-    app.add_middleware(
+    fastapi_app = FastAPI()
+    fastapi_app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
-    )
+    )  # type: ignore
+    fastapi_app.include_router(ApiRouter().router)
+    return fastapi_app
 
-    # Include routers
-    app.include_router(ApiRouter().router)
-
-    return app
-
-
-# Expose FastAPI app for Uvicorn
 app = create_app()
-
 
 if __name__ == "__main__":
     import uvicorn
