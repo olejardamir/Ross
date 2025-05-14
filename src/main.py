@@ -1,39 +1,38 @@
+# src/main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routing import ApiRouter  # Make sure this exists and works
+from app.routing import ApiRouter  # Ensure this path is correct
 
 
-class RossApp:
-    def __init__(self):
-        self.app = FastAPI()
-        self.setup_cors()
-        self.include_routers()
+def create_app() -> FastAPI:
+    app = FastAPI()
 
-    def setup_cors(self):
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+    # Set up CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-    def include_routers(self):
-        self.app.include_router(ApiRouter().router)
+    # Include routers
+    app.include_router(ApiRouter().router)
 
-    def get_app(self) -> FastAPI:
-        return self.app
+    return app
 
 
-# This is the actual FastAPI app exposed to Uvicorn
-app = RossApp().get_app()
+# Expose FastAPI app for Uvicorn
+app = create_app()
 
 
 if __name__ == "__main__":
     import uvicorn
 
+    # Run directly (no need to reference "src.main" when calling from this file)
     uvicorn.run(
-        "src.main:app",  # Make sure this points to the correct module:var path
+        "main:app",  # NOT "src.main:app" when running from inside `src/`
         host="127.0.0.1",
         port=8000,
         reload=True,

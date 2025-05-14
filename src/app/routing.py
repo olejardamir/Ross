@@ -1,39 +1,51 @@
 from fastapi import APIRouter, Request, status, HTTPException
 from fastapi.responses import JSONResponse
 
+from Ross_git.src.app.services.status_service import StatusService
+from Ross_git.src.app.services.echo_service import EchoService
+from Ross_git.src.app.controllers.echo_controller import EchoController
+from Ross_git.src.app.controllers.status_controller import StatusController
+
+
 class ApiRouter:
     def __init__(self):
         self.router = APIRouter()
+
+        # Dependency injection
+        status_controller = StatusController()
+        echo_controller = EchoController()
+
+        self.status_service = StatusService(controller=status_controller)
+        self.echo_service = EchoService(controller=echo_controller)
+
         self.add_routes()
 
     def add_routes(self):
-        """Define and add routes to the router."""
         self.router.add_api_route("/status", self.get_status, methods=["GET"])
         self.router.add_api_route("/echo", self.post_echo, methods=["POST"])
 
     async def get_status(self, request: Request):
-        """Handle GET requests to /status."""
         if request.url.scheme != "https":
             return JSONResponse(
                 content={"error": "HTTPS required"},
                 status_code=status.HTTP_403_FORBIDDEN
             )
-        return {"message": "Service is up"}
+        message = self.status_service.get_status()
+        return {"message": message}
 
     async def post_echo(self, request: Request):
-        """Handle POST requests to /echo."""
         if request.url.scheme != "https":
             return JSONResponse(
                 content={"error": "HTTPS required"},
                 status_code=status.HTTP_403_FORBIDDEN
             )
-
         try:
             body = await request.json()
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid JSON"
             )
 
-        return {"received": body}
+        message = self.echo_service.handle_echo(body)
+        return {"message": message}
