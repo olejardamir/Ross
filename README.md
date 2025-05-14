@@ -63,3 +63,14 @@ Save the certificate to your local machine.
 Open Firefox settings and search for "Certificates".
 
 Under "Authorities", click "Import" and select the saved certificate file to add it to the trusted authorities.
+
+
+
+
+Call 1:
+curl -X POST "https://127.0.0.1:8000/speech" \
+     -H "Content-Type: application/json" \
+     -d '{"topic":"The importance of digital literacy in the modern world"}' \
+     -k > speech_output.json
+
+
