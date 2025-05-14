@@ -113,7 +113,7 @@ START OF SPEECH:
             logger.warning("Speech generation failed to extract valid content.")
 
     logger.error("All retries failed. Returning fallback response.")
-    return "Use a different model"
+    return "Try again or use a different model."
 
 
 def continue_speech(topic, last_paragraph):
