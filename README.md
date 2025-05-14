@@ -1,3 +1,6 @@
+Python version 3.10
+
+
 The framework structure:
 
 ├── data/                  # Sample datasets, config data, non-code resources
