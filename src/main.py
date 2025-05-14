@@ -1,8 +1,7 @@
-# src/main.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routing import ApiRouter  # Ensure this path is correct
+from app.config.settings import settings  # Load settings from .env
 
 
 def create_app() -> FastAPI:
@@ -30,12 +29,11 @@ app = create_app()
 if __name__ == "__main__":
     import uvicorn
 
-    # Run directly (no need to reference "src.main" when calling from this file)
     uvicorn.run(
-        "main:app",  # NOT "src.main:app" when running from inside `src/`
-        host="127.0.0.1",
-        port=8000,
-        reload=True,
-        ssl_keyfile="./app/config/key.pem",
-        ssl_certfile="./app/config/cert.pem"
+        "main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.RELOAD,
+        ssl_keyfile=settings.SSL_KEYFILE,
+        ssl_certfile=settings.SSL_CERTFILE,
     )
