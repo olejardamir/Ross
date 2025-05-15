@@ -36,3 +36,5 @@ tests/integration/__pycache__/
 src/app/utils/core/output/
 
 src/app/utils/core/tmp/
+
+src/output/

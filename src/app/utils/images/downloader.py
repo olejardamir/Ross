@@ -11,7 +11,11 @@ class ImageProcessor:
 
     def __init__(self, image_url, output_dir="."):
         self.image_url = image_url
-        self.output_dir = output_dir
+
+        # Make output_dir absolute relative to this file's directory
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.output_dir = os.path.join(base_dir, output_dir)
+
         self.image = None
         self.resized_image = None
         self.final_image = None
@@ -80,13 +84,3 @@ def download_images_sequentially(urls, output_dir="output"):
             print(f"Skipped {url}")
         else:
             print(f"Successfully saved {saved_path}")
-
-
-# Example usage:
-# if __name__ == "__main__":
-#     urls = [
-#         "http://4.bp.blogspot.com/-6Gur5leMULA/UW7clZ7VTLI/AAAAAAAAhxI/YEN6kYrK20Y/s1600/funny-cat-pictures-046-019.jpg",
-#         "https://invalid-url.com/image.jpg",  # This will fail gracefully
-#         "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
-#     ]
-#     download_images_sequentially(urls, output_dir="output")

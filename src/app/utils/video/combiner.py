@@ -6,7 +6,7 @@ class VideoCombiner:
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
         self.img_dir = os.path.abspath(os.path.join(self.base_dir, "../core/output"))
-        self.audio_path = os.path.abspath(os.path.join(self.base_dir, "../core/tmp/mixed_output.mp3"))
+        self.audio_path = os.path.abspath(os.path.join(self.base_dir, "../audio/tmp/mixed_output.mp3"))
         self.output_path = os.path.abspath(os.path.join(self.base_dir, "../core/tmp/final_output.mp4"))
 
     def get_audio_duration_seconds(self):

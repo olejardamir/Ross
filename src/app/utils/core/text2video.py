@@ -1,6 +1,9 @@
-import json
+import requests
+from PIL import Image
+from io import BytesIO
 import os
 import shutil
+import json
 import jellyfish
 
 from Ross_git.src.app.utils.NLP.parser import NLPParser
@@ -12,6 +15,91 @@ from Ross_git.src.app.utils.websearch.duck_go import DuckDuckGoImageSearcher
 
 
 BACKGROUND_MUSIC_PATH = "/path/to/background_music.mp3"  # <-- Update this path
+
+
+class ImageProcessor:
+    MIN_WIDTH = 640
+    MIN_HEIGHT = 360
+    TARGET_WIDTH = 1280
+    TARGET_HEIGHT = 720
+
+    def __init__(self, image_url, output_dir="."):
+        self.image_url = image_url
+        # Resolve absolute path based on this script location
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.output_dir = (
+            output_dir if os.path.isabs(output_dir) else os.path.join(base_dir, output_dir)
+        )
+        self.image = None
+        self.resized_image = None
+        self.final_image = None
+
+    def download_image(self):
+        try:
+            response = requests.get(self.image_url, timeout=10)
+            response.raise_for_status()
+            self.image = Image.open(BytesIO(response.content)).convert("RGB")
+            return True
+        except Exception as e:
+            print(f"Failed to download/open image from {self.image_url}: {e}")
+            return False
+
+    def is_size_valid(self):
+        if self.image is None:
+            return False
+        return self.image.width >= self.MIN_WIDTH and self.image.height >= self.MIN_HEIGHT
+
+    def resize_and_crop(self):
+        img_ratio = self.image.width / self.image.height
+        target_ratio = self.TARGET_WIDTH / self.TARGET_HEIGHT
+
+        if img_ratio > target_ratio:
+            scale_factor = self.TARGET_HEIGHT / self.image.height
+        else:
+            scale_factor = self.TARGET_WIDTH / self.image.width
+
+        new_size = (
+            int(self.image.width * scale_factor),
+            int(self.image.height * scale_factor),
+        )
+        self.resized_image = self.image.resize(new_size, Image.BICUBIC)
+
+        left = (self.resized_image.width - self.TARGET_WIDTH) // 2
+        top = (self.resized_image.height - self.TARGET_HEIGHT) // 2
+        right = left + self.TARGET_WIDTH
+        bottom = top + self.TARGET_HEIGHT
+
+        self.final_image = self.resized_image.crop((left, top, right, bottom))
+
+    def save_image(self, filename):
+        os.makedirs(self.output_dir, exist_ok=True)
+        filepath = os.path.join(self.output_dir, filename)
+        self.final_image.save(filepath, format="PNG")
+        print(f"Saved image: {filepath}")
+        return filepath
+
+    def process(self, filename):
+        if not self.download_image():
+            return None
+        if not self.is_size_valid():
+            print(f"Image too small: {self.image.width}x{self.image.height}. Skipping.")
+            return None
+        self.resize_and_crop()
+        return self.save_image(filename)
+
+
+def download_images_sequentially(urls, output_dir="."):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    abs_output_dir = output_dir if os.path.isabs(output_dir) else os.path.join(base_dir, output_dir)
+    for i, url in enumerate(urls):
+        filename = f"{i:03d}.png"
+        print(f"Processing {url} -> {filename}")
+        processor = ImageProcessor(url, abs_output_dir)
+        saved_path = processor.process(filename)
+        if saved_path is None:
+            print(f"Skipped {url}")
+        else:
+            print(f"Successfully saved {saved_path}")
 
 
 class ImageSearcher:
@@ -45,7 +133,7 @@ class ImageOrderer:
         ordered = []
 
         for sentence_obj in parsed_sentences:
-            sentence = sentence_obj.get('sentence', '')
+            sentence = sentence_obj.get("sentence", "")
 
             best_idx = None
             best_score = -1
@@ -53,7 +141,7 @@ class ImageOrderer:
             for i, img in enumerate(images):
                 if assigned[i]:
                     continue
-                title = img.get('title', '')
+                title = img.get("title", "")
                 score = jellyfish.jaro_similarity(sentence.lower(), title.lower())
                 if score > best_score:
                     best_score = score
@@ -72,7 +160,8 @@ class ImageOrderer:
 
 
 class ImageDownloader:
-    def __init__(self, output_dir="output"):
+    def __init__(self, output_dir):
+        # output_dir is absolute path
         self.output_dir = output_dir
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
@@ -80,9 +169,9 @@ class ImageDownloader:
     def download(self, ordered_images):
         for idx, image_data in enumerate(ordered_images, start=1):
             filename = f"{idx:03}.png"
-            image_data['output_filename'] = filename
-            processor = ImageProcessor(image_data, output_dir=self.output_dir)
-            processor.process()
+            image_data["output_filename"] = filename
+            processor = ImageProcessor(image_data["image"], output_dir=self.output_dir)
+            processor.process(filename)
         print(f"Downloaded {len(ordered_images)} images to '{self.output_dir}'")
 
     def extract_urls(self, images):
@@ -104,7 +193,7 @@ class AudioMixer:
         mixer = SpeechMusicMixer(speech_path=speech_file, music_path=music_path)
         mixer.mix_speech_with_music(
             speech_rel_path=speech_file,
-            speech_length_ns=duration_ns
+            speech_length_ns=duration_ns,
         )
         print("Mixed speech audio with background music.")
 
@@ -119,19 +208,28 @@ class VideoMaker:
 
 
 class VideoGenerator:
-    def __init__(self, image_output_dir="output", max_image_results=100):
+    def __init__(
+        self,
+        image_output_dir="output",
+        image_tmp_dir="tmp",
+        max_image_results=100,
+    ):
+        base_dir = os.path.dirname(os.path.abspath(__file__))  # this file's dir
+
+        # Assuming this script is inside Ross_git/src/app/utils/core/
+        self.output_dir = os.path.join(base_dir, image_output_dir)
+        self.tmp_dir = os.path.join(base_dir, image_tmp_dir)
+
         self.image_searcher = ImageSearcher(max_results=max_image_results)
         self.text_parser = TextParser()
         self.image_orderer = ImageOrderer()
-        self.image_downloader = ImageDownloader(output_dir=image_output_dir)
+
+        # pass absolute output_dir to ImageDownloader
+        self.image_downloader = ImageDownloader(output_dir=self.output_dir)
+
         self.tts = TextToSpeech()
         self.audio_mixer = AudioMixer()
         self.video_maker = VideoMaker()
-
-        # Resolve absolute paths relative to this script's location
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.tmp_dir = os.path.join(base_dir, "tmp")
-        self.output_dir = os.path.join(base_dir, image_output_dir)
 
     def _clean_dirs(self):
         for folder in [self.tmp_dir, self.output_dir]:
@@ -156,7 +254,8 @@ class VideoGenerator:
         ordered_images = self.image_orderer.order(parsed_sentences, duck_results)
 
         image_urls = self.image_downloader.extract_urls(ordered_images)
-        download_images_sequentially(image_urls, output_dir=self.image_downloader.output_dir)
+
+        download_images_sequentially(image_urls, output_dir=self.output_dir)
         self.image_downloader.download(ordered_images)
 
         speech_file, duration_ns = self.tts.synthesize(speech)
@@ -164,16 +263,3 @@ class VideoGenerator:
 
         self.video_maker.generate()
         print("Video generation completed.")
-
-
-if __name__ == "__main__":
-    topic = "importance of cats"
-    speech = """
-    Cats have shared their lives with humans for thousands of years, weaving themselves into the fabric of our societies, cultures, and personal lives. Though often seen as independent and mysterious, cats have proven to be deeply important companions to humans in many ways. Their importance extends far beyond the simple pleasure of their purring presence on a lap. From their historical roles in pest control to their cultural symbolism, therapeutic benefits, and ecological influence, cats hold a significant place in our world.
-
-    Historical and Cultural Significance
-    The history of human-cat relationships dates back at least 9,000 years. The first evidence of domesticated cats was found on the Mediterranean island of Cyprus, where a cat was buried alongside a human. This early companionship hints at a practical relationship: cats helped control rodent populations in early agricultural communities, protecting stored grains from infestations.
-    """
-
-    generator = VideoGenerator()
-    generator.generate_video(topic, speech)

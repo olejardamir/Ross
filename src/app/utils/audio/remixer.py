@@ -1,3 +1,4 @@
+import os
 from pydub import AudioSegment
 
 class SpeechMusicMixer:
@@ -36,22 +37,19 @@ class SpeechMusicMixer:
 
     @staticmethod
     def mix_speech_with_music(speech_rel_path: str, speech_length_ns: int):
-        """
-        Static helper method to create and run a SpeechMusicMixer instance
-        using relative speech path and length in nanoseconds.
-        """
-        # Resolve relative paths based on remixer.py's location
-        speech_path = f"tmp/{speech_rel_path}"
-        music_path = "../audio/music/uplifting_guitar.mp3"
+        # Get absolute directory of this remixer.py file
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Resolve speech and music paths relative to remixer.py location
+        speech_path = os.path.join(base_dir, "tmp", speech_rel_path)
+        music_path = os.path.join(base_dir, "..", "audio", "music", "uplifting_guitar.mp3")
+        output_path = os.path.join(base_dir, "tmp", "mixed_output.mp3")
         speech_length_ms = speech_length_ns // 1_000_000
 
         mixer = SpeechMusicMixer(
             speech_path=speech_path,
             music_path=music_path,
-            output_path="tmp/mixed_output.mp3",
+            output_path=output_path,
             speech_length_ms=speech_length_ms
         )
         mixer.run()
-
-
-
