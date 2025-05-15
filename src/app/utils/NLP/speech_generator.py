@@ -172,8 +172,8 @@ def generate_full_speech(topic):
     return final_speech
 
 
-if __name__ == "__main__":
-    topic = "The importance of digital literacy in the modern world"
-    full_output = generate_full_speech(topic)
-    logger.info(f"\nFinal Speech Output:\n{full_output}")
-    print(f"\nFinal Speech Output:\n{full_output}")
+# if __name__ == "__main__":
+#     topic = "The importance of digital literacy in the modern world"
+#     full_output = generate_full_speech(topic)
+#     logger.info(f"\nFinal Speech Output:\n{full_output}")
+#     print(f"\nFinal Speech Output:\n{full_output}")
