@@ -15,7 +15,7 @@ class SpeechMusicMixer:
         self.music = AudioSegment.from_file(self.music_path)
 
     def process_music(self):
-        self.music = self.music - 6  # Reduce volume ~50%
+        self.music = self.music - 9.13  # Reduce volume to about 35%
         target_duration = len(self.speech) + 1000  # +1s for fade-out
         while len(self.music) < target_duration:
             self.music += self.music

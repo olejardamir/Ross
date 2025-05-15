@@ -2,7 +2,7 @@ from duckduckgo_search import DDGS
 
 
 class DuckDuckGoImageSearcher:
-    def __init__(self, prompt: str, max_results: int = 100):
+    def __init__(self, prompt: str, max_results: int = 60):
         self.user_prompt = prompt
         self.max_results = max_results
         self.headers = {
