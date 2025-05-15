@@ -7,71 +7,20 @@
   <link rel="stylesheet" href="app/view/css/styles.css" />
 </head>
 <body>
-<div id="spinner" class="spinner-overlay" style="display:none;">
-  <img src="app/view/images/spinner1.gif" alt="Loading..." />
-</div>
+  <div id="spinner" class="spinner-overlay" style="display:none;">
+    <img src="app/view/images/spinner1.gif" alt="Loading..." />
+  </div>
 
   <div class="container">
     <img class="main-image" src="app/view/images/main.png" alt="Main Image" height="50"/>
-<div class="overlay">
-  <input type="text" id="textField" placeholder="Enter speech topic, press OK to generate." />
-  <textarea id="textArea" placeholder="Edit the generated speech here, or paste your own."></textarea>
-  <div id="clickableAreaA" tabindex="0" role="button" aria-pressed="false"></div>
-  <div id="clickableAreaB" tabindex="0" role="button" aria-pressed="false"></div>
-</div>
-
+    <div class="overlay">
+      <input type="text" id="textField" placeholder="Enter speech topic, press OK to generate." />
+      <textarea id="textArea" placeholder="Edit the generated speech here, or paste your own."></textarea>
+      <div id="clickableAreaA" tabindex="0" role="button" aria-pressed="false"></div>
+      <div id="clickableAreaB" tabindex="0" role="button" aria-pressed="false"></div>
+    </div>
   </div>
 
-  <script>
-  const clickableAreaA = document.getElementById('clickableAreaA');
-  const textField = document.getElementById('textField');
-  const textArea = document.getElementById('textArea');
-  const overlay = document.querySelector('.overlay');
-  const spinner = document.getElementById('spinner');
-
-  clickableAreaA.addEventListener('click', async () => {
-    const topic = textField.value.trim();
-
-    if (topic.length < 10) {
-      alert('Text is too short');
-      return;
-    }
-
-    // Show spinner and disable interface
-    spinner.style.display = 'flex';
-    overlay.classList.add('disabled');
-
-    try {
-      const response = await fetch('https://localhost:8000/speech', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ topic }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-
-      // Place response text in the textarea
-      textArea.value = responseData.speech || 'No text field in response.';
-
-    } catch (error) {
-      alert('Failed to generate speech: ' + error.message);
-    } finally {
-      // Hide spinner and re-enable interface
-      spinner.style.display = 'none';
-      overlay.classList.remove('disabled');
-    }
-  });
-
-  // Add click event for clickable area
-    document.getElementById('clickableAreaB').addEventListener('click', () => {
-      alert('Clickable area B was clicked!');
-    });
-  </script>
+  <script src="app/view/scripts/interactiveOverlay.js"></script>
 </body>
 </html>
