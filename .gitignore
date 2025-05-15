@@ -38,3 +38,7 @@ src/app/utils/core/output/
 src/app/utils/core/tmp/
 
 src/output/
+
+src/app/utils/audio/tmp/
+
+src/tmp/
