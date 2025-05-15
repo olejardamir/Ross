@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Image Overlay</title>
+  <link rel="stylesheet" href="app/view/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <img class="main-image" src="app/view/images/main.png" alt="Main Image" height="50"/>
+<div class="overlay">
+  <input type="text" id="textField" placeholder="Describe speech to generate, press OK" />
+  <textarea id="textArea" placeholder="Generated speech will appear here for editing, or you can use your own..."></textarea>
+  <div id="clickableAreaA" tabindex="0" role="button" aria-pressed="false"></div>
+  <div id="clickableAreaB" tabindex="0" role="button" aria-pressed="false"></div>
+</div>
+
+  </div>
+
+  <script>
+    // Add click event for clickable area
+    document.getElementById('clickableAreaA').addEventListener('click', () => {
+      alert('Clickable area A was clicked!');
+    });
+
+  // Add click event for clickable area
+    document.getElementById('clickableAreaB').addEventListener('click', () => {
+      alert('Clickable area B was clicked!');
+    });
+  </script>
+</body>
+</html>

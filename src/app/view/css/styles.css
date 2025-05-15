@@ -1,0 +1,107 @@
+body, html {
+  margin: 0; padding: 0; height: 100%;
+  background: #f0f0f0;
+  font-family: Arial, sans-serif;
+}
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 800px; /* adjust max width as needed */
+  margin: 0 auto; /* center horizontally */
+  padding-top: 10px; /* space from top */
+}
+.main-image {
+  display: block;
+  width: 60%;
+  height: auto;
+}
+/* Overlay container: relative position to contain absolutely positioned elements */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* let clicks pass through overlay container by default */
+}
+/* Make interactive elements accept pointer events */
+.overlay * {
+  pointer-events: auto;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+}
+/* Text field */
+#textField {
+  position: absolute;
+    height: 59px;
+    top: 128px;
+    left: 240px;
+  transform: translateX(-50%);
+  width: 336px;
+  padding: 8px 12px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.9);
+  box-sizing: border-box;
+}
+/* Text area */
+#textArea {
+  position: absolute;
+  top: 279px;
+  left: 239px;
+  transform: translateX(-50%);
+  height: 422px;
+  padding: 8px 12px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  resize: none;
+  background: rgba(255,255,255,0.9);
+  box-sizing: border-box;
+  width: 336px;
+}
+/* Clickable area */
+#clickableAreaA {
+  position: absolute;
+  top: 200px;
+  left: 239px;
+  transform: translateX(-50%);
+  width: 88px;
+  height: 40px;
+  background: transparent;
+  color: transparent;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: normal;
+  box-shadow: none;
+  transition: none;
+}
+
+
+#clickableAreaB {
+  position: absolute;
+  top: 720px;
+  left: 239px;
+  transform: translateX(-50%);
+  width: 216px;
+  height: 95px;
+  background: transparent;
+  color: transparent;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: normal;
+  box-shadow: none;
+  transition: none;
+}
+
+
