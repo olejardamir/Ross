@@ -1,6 +1,7 @@
 import os
 import uuid
 from gtts import gTTS
+from mutagen.mp3 import MP3
 
 class TextToSpeechSaver:
     def __init__(self, tmp_dir: str = "tmp", language: str = "en"):
@@ -8,44 +9,49 @@ class TextToSpeechSaver:
         self.language = language
         os.makedirs(self.tmp_dir, exist_ok=True)
 
-    def synthesize(self, text: str, index: int, unique_id: str) -> str | None:
+    def synthesize(self, text: str, unique_id: str | None = None) -> tuple[str | None, int | None]:
         """
         Converts text to speech and saves the audio file.
 
         Args:
         - text (str): Text to convert.
-        - index (int): Sequence number for naming.
-        - unique_id (str): UUID for uniqueness.
+        - unique_id (str | None): UUID for filename uniqueness (optional).
 
         Returns:
-        - str | None: File path if successful, None on failure.
+        - tuple[str | None, int | None]: (file name, length in nanoseconds) if successful,
+          (None, None) on failure.
         """
         try:
-            file_name = f"{unique_id}_{index}.mp3"
+            if unique_id is None:
+                unique_id = str(uuid.uuid4())
+
+            file_name = f"{unique_id}.mp3"
             file_path = os.path.join(self.tmp_dir, file_name)
 
+            # Generate speech and save
             tts = gTTS(text=text, lang=self.language)
             tts.save(file_path)
 
-            print(f"[INFO] Audio saved as '{file_path}'")
-            return file_path
+            # Extract duration using mutagen
+            audio = MP3(file_path)
+            duration_sec = audio.info.length  # Duration in seconds (float)
+            duration_ns = int(duration_sec * 1e9)  # Convert to nanoseconds
+
+            print(f"[INFO] Audio saved as '{file_path}' with duration {duration_ns} ns")
+            return file_name, duration_ns
 
         except Exception as e:
             print(f"[ERROR] Failed to convert text to speech: {str(e)}")
-            return None
-
+            return None, None
 
 if __name__ == "__main__":
-    test_text = (
+    sample_text = (
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
-        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, "
-        "when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."
     )
 
     tts_saver = TextToSpeechSaver()
-    unique_id = str(uuid.uuid4())
+    file_name, duration_ns = tts_saver.synthesize(sample_text)
 
-    for index in range(1, 4):
-        file_path = tts_saver.synthesize(test_text, index=index, unique_id=unique_id)
-        if file_path:
-            print(f"[INFO] File saved: {file_path}")
+    if file_name:
+        print(f"[INFO] File saved: {file_name}, Duration: {duration_ns} nanoseconds")

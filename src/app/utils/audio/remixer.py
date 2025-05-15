@@ -1,11 +1,11 @@
 from pydub import AudioSegment
-import os
 
 class SpeechMusicMixer:
-    def __init__(self, speech_path: str, music_path: str, output_path: str = "mixed_output.mp3"):
+    def __init__(self, speech_path: str, music_path: str, output_path: str = "mixed_output.mp3", speech_length_ms: int = None):
         self.speech_path = speech_path
         self.music_path = music_path
         self.output_path = output_path
+        self.speech_length_ms = speech_length_ms
         self.speech = None
         self.music = None
         self.mixed = None
@@ -15,19 +15,13 @@ class SpeechMusicMixer:
         self.music = AudioSegment.from_file(self.music_path)
 
     def process_music(self):
-        # Reduce music volume by 6dB (~50%)
-        self.music = self.music - 6
-
-        # Ensure music is long enough
+        self.music = self.music - 6  # Reduce volume ~50%
         target_duration = len(self.speech) + 1000  # +1s for fade-out
         while len(self.music) < target_duration:
             self.music += self.music
-
-        # Trim and apply fade-in and fade-out
         self.music = self.music[:target_duration].fade_in(1000).fade_out(1000)
 
     def mix(self):
-        # Mix speech over music with 1s offset
         self.mixed = self.music.overlay(self.speech, position=1000)
 
     def export(self):
@@ -40,11 +34,24 @@ class SpeechMusicMixer:
         self.mix()
         self.export()
 
+    @staticmethod
+    def mix_speech_with_music(speech_rel_path: str, speech_length_ns: int):
+        """
+        Static helper method to create and run a SpeechMusicMixer instance
+        using relative speech path and length in nanoseconds.
+        """
+        # Resolve relative paths based on remixer.py's location
+        speech_path = f"tmp/{speech_rel_path}"
+        music_path = "../audio/music/uplifting_guitar.mp3"
+        speech_length_ms = speech_length_ns // 1_000_000
 
-if __name__ == "__main__":
-    mixer = SpeechMusicMixer(
-        speech_path="/home/coka/Desktop/Ross/Ross_git/src/app/utils/audio/tmp/6250064e-c0b0-46c9-b298-e5baf76c8603_1.mp3",
-        music_path="/home/coka/Desktop/Ross/Ross_git/src/app/utils/audio/music/upbeat.mp3",
-        output_path="mixed_output.mp3"
-    )
-    mixer.run()
+        mixer = SpeechMusicMixer(
+            speech_path=speech_path,
+            music_path=music_path,
+            output_path="tmp/mixed_output.mp3",
+            speech_length_ms=speech_length_ms
+        )
+        mixer.run()
+
+
+

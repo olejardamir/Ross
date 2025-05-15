@@ -55,12 +55,4 @@ class NLPParser:
             print(f"   Proper Nouns: {', '.join(item['proper_nouns']) or 'None'}")
 
 
-if __name__ == "__main__":
-    parser = NLPParser()
-    example = (
-        "Alice gave Bob a book. "
-        "He read it quickly, then traveled to Paris. "
-        "Finally, the adventure ended."
-    )
-    results = parser.process(example)
-    parser.display(results)
+
